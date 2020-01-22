@@ -1,6 +1,6 @@
 package pushka.json
 
-import jawn.SimpleFacade
+import org.typelevel.jawn.Facade.SimpleFacade
 import pushka.Ast
 
 object PushkaFacade extends SimpleFacade[Ast] {
@@ -20,4 +20,8 @@ object PushkaFacade extends SimpleFacade[Ast] {
   def jtrue(): Ast = Ast.True
 
   def jstring(s: String): Ast = Ast.Str(s)
+
+  override def jnum(s: CharSequence, decIndex: Int, expIndex: Int): Ast = Ast.Num(s.toString)
+
+  override def jstring(s: CharSequence): Ast = Ast.Str(s.toString)
 }

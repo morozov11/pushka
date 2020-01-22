@@ -57,12 +57,12 @@ class SealedTraitSpec extends FlatSpec with Matchers {
     val instance = Container(User.Name("John", "Doe"), 10)
     write(instance) should be(
       Ast.Obj(Map(
-        "user" → Ast.Obj(Map(
-          "name" → Ast.Obj(Map(
-            "first" → Ast.Str("John"),
-            "last" → Ast.Str("Doe"))
+        "user" -> Ast.Obj(Map(
+          "name" -> Ast.Obj(Map(
+            "first" -> Ast.Str("John"),
+            "last" -> Ast.Str("Doe"))
           ))),
-        "anotherField" → Ast.Num("10")
+        "anotherField" -> Ast.Num("10")
       ))
     )
   }
@@ -71,8 +71,8 @@ class SealedTraitSpec extends FlatSpec with Matchers {
     val instance = Container(User.Empty, 10)
     write(instance) should be(
       Ast.Obj(Map(
-        "user" → Ast.Str("empty"),
-        "anotherField" → Ast.Num("10"
+        "user" -> Ast.Str("empty"),
+        "anotherField" -> Ast.Num("10"
         ))
       )
     )
@@ -80,7 +80,7 @@ class SealedTraitSpec extends FlatSpec with Matchers {
 
   "Sealed trait with body" should "be processed" in {
     write[WithBody](WithBody.A) shouldEqual Ast.Str("a")
-    write[WithBody](WithBody.B(1)) shouldEqual Ast.Obj(Map("b" → Ast.Num(1)))
+    write[WithBody](WithBody.B(1)) shouldEqual Ast.Obj(Map("b" -> Ast.Num(1)))
   }
 
   "Deprecated annotation in case classes" should "not breaks writing" in {
@@ -92,7 +92,7 @@ class SealedTraitSpec extends FlatSpec with Matchers {
   }
 
   it should "throw exception with correct message if Ast is invalid" in {
-    val invalidAst = Ast("foo" → "bar")
+    val invalidAst = Ast("foo" -> "bar")
     val exception = intercept[PushkaException] {
       read[Color](invalidAst)
     }

@@ -1,39 +1,17 @@
-val publishSettings = Seq(
-  publishMavenStyle := true,
-  publishArtifact in Test := false,
-  pomIncludeRepository := { _ => false },
-  publishTo := {
-    val nexus = "https://oss.sonatype.org/"
-    if (isSnapshot.value) Some("snapshots" at s"${nexus}content/repositories/snapshots")
-    else Some("releases" at s"${nexus}service/local/staging/deploy/maven2")
-  },
-  pomExtra := {
-    <url>https://github.com/fomkin/pushka</url>
-    <licenses>
-      <license>
-        <name>Apache License, Version 2.0</name>
-        <url>http://apache.org/licenses/LICENSE-2.0</url>
-        <distribution>repo</distribution>
-      </license>
-    </licenses>
-    <scm>
-      <url>git@github.com:fomkin/pushka.git</url>
-      <connection>scm:git:git@github.com:fomkin/pushka.git</connection>
-    </scm>
-    <developers>
-      <developer>
-        <id>fomkin</id>
-        <name>Aleksey Fomkin</name>
-        <email>aleksey.fomkin@gmail.com</email>
-      </developer>
-    </developers>
-  }
-)
+import sbt.Keys.publishArtifact
 
-val commonSettings = publishSettings ++ Seq(
-  organization := "com.github.fomkin",
-  version := "0.8.0",
-  libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.0" % "test",
+licenses      += ("Apache-2.0", url("http://www.apache.org/licenses/"))
+
+scalaVersion := "2.13.1"
+
+version := "0.8.1-sevts"
+
+
+val commonSettings = Seq(
+  organization := "jellical",
+  version := "0.8.1-sevts",
+  scalaVersion := "2.13.1",
+  libraryDependencies += "org.scalatest" %%% "scalatest" % "3.1.0" % "test",
   scalacOptions ++= Seq(
     "-deprecation",
     "-feature",
@@ -46,14 +24,21 @@ val commonSettings = publishSettings ++ Seq(
 lazy val core = crossProject.crossType(CrossType.Pure).
   settings(commonSettings: _*).
   settings(
+    scalaVersion := "2.13.1",
     normalizedName := "pushka-core",
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "macro-compat" % "1.1.1",
       "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
       "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided"
     ),
-    addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
-    sourceGenerators in Compile <+= sourceManaged in Compile map GenTuples
+    sourceGenerators in Compile += sourceManaged in Compile map GenTuples,
+    licenses      += ("Apache-2.0", url("http://www.apache.org/licenses/")),
+    version := "0.8.1-sevts",
+    publishMavenStyle := true,
+    publishArtifact in Test := false,
+    pomIncludeRepository := { _ => false },
+    publishMavenStyle       := true,
+    bintrayOrganization     := None,
+    bintrayRepository := "pushka"
   )
 
 lazy val coreJS = core.js
@@ -62,17 +47,24 @@ lazy val coreJVM = core.jvm
 lazy val json = crossProject.crossType(CrossType.Full).
   settings(commonSettings: _*).
   settings(
+    scalaVersion := "2.13.1",
     normalizedName := "pushka-json",
-    unmanagedSourceDirectories in Test += baseDirectory.value / ".." / "test-src"
+    unmanagedSourceDirectories in Test += baseDirectory.value / ".." / "test-src",
+    licenses      += ("Apache-2.0", url("http://www.apache.org/licenses/")),
+    version := "0.8.1-sevts",
+    publishMavenStyle := true,
+    publishArtifact in Test := false,
+    pomIncludeRepository := { _ => false },
+    publishMavenStyle       := true,
+    bintrayOrganization     := None,
+    bintrayRepository := "pushka"
   ).
-  jvmSettings(libraryDependencies += "org.spire-math" %% "jawn-parser" % "0.10.4").
+  jvmSettings(
+    libraryDependencies += "org.typelevel" %% "jawn-parser" % "1.0.0",
+    libraryDependencies += "org.typelevel" %% "jawn-ast" % "1.0.0"
+  ).
   dependsOn(core)
 
 lazy val jsonJS = json.js
 lazy val jsonJVM = json.jvm
 
-publishTo := Some(Resolver.file("Unused transient repository", file("target/unusedrepo")))
-
-crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.0")
-
-publishArtifact := false

@@ -35,7 +35,7 @@ class PrinterSpec extends FlatSpec with Matchers {
   }
 
   "Obj" should "be printed" in {
-    val source = Ast.Obj(Map("x" → Ast.Null, "y" → Ast.Null))
+    val source = Ast.Obj(Map("x" -> Ast.Null, "y" -> Ast.Null))
     printer.print(source) shouldEqual "{\"x\":null,\"y\":null}"
   }
 

@@ -11,27 +11,27 @@ class DefaultRWs extends Generated {
 
   implicit def optionRW[T](implicit r: Reader[T], w: Writer[T]): RW[Option[T]] = new RW[Option[T]] {
     def read(value: Ast): Option[T] = value match {
-      case Ast.Null ⇒ None
-      case _ ⇒ Some(r.read(value))
+      case Ast.Null => None
+      case _ => Some(r.read(value))
     }
 
     def write(value: Option[T]): Ast = value match {
-      case None ⇒ Ast.Null
-      case Some(x) ⇒ w.write(x)
+      case None => Ast.Null
+      case Some(x) => w.write(x)
     }
   }
 
   implicit def eitherRW[Left, Right](implicit leftRw: RW[Left], rightRw: RW[Right]): RW[Either[Left, Right]] = {
     new RW[Either[Left, Right]] {
       def write(value: Either[Left, Right]): Ast = value match {
-        case Left(x) ⇒ Ast.Obj(Map("left" → leftRw.write(x)))
-        case Right(x) ⇒ Ast.Obj(Map("right" → rightRw.write(x)))
+        case Left(x) => Ast.Obj(Map("left" -> leftRw.write(x)))
+        case Right(x) => Ast.Obj(Map("right" -> rightRw.write(x)))
       }
 
       def read(value: Ast): Either[Left, Right] = value match {
-        case Ast.Obj(m) if m.contains("left") ⇒ Left(leftRw.read(m("left")))
-        case Ast.Obj(m) if m.contains("right") ⇒ Right(rightRw.read(m("right")))
-        case _ ⇒ throw PushkaException(value, Either.getClass)
+        case Ast.Obj(m) if m.contains("left") => Left(leftRw.read(m("left")))
+        case Ast.Obj(m) if m.contains("right") => Right(rightRw.read(m("right")))
+        case _ => throw PushkaException(value, Either.getClass)
       }
     }
   }
@@ -48,9 +48,9 @@ class DefaultRWs extends Generated {
 
   implicit val booleanRW = new RW[Boolean] {
     def read(value: Ast): Boolean = value match {
-      case Ast.True ⇒ true
-      case Ast.False ⇒ false
-      case _ ⇒ throw PushkaException(value, Boolean.getClass)
+      case Ast.True => true
+      case Ast.False => false
+      case _ => throw PushkaException(value, Boolean.getClass)
     }
 
     def write(value: Boolean): Ast = {
@@ -60,8 +60,8 @@ class DefaultRWs extends Generated {
 
   implicit val int = new RW[Int] {
     def read(value: Ast): Int = value match {
-      case Ast.Num(x) ⇒ x.toInt
-      case _ ⇒ throw PushkaException(value, Int.getClass)
+      case Ast.Num(x) => x.toInt
+      case _ => throw PushkaException(value, Int.getClass)
     }
 
     def write(value: Int): Ast = {
@@ -71,8 +71,8 @@ class DefaultRWs extends Generated {
 
   implicit val double = new RW[Double] {
     def read(value: Ast): Double = value match {
-      case Ast.Num(x) ⇒ x.toDouble
-      case _ ⇒ throw PushkaException(value, Double.getClass)
+      case Ast.Num(x) => x.toDouble
+      case _ => throw PushkaException(value, Double.getClass)
     }
 
     def write(value: Double): Ast = {
@@ -82,8 +82,8 @@ class DefaultRWs extends Generated {
 
   implicit val float = new RW[Float] {
     def read(value: Ast): Float = value match {
-      case Ast.Num(x) ⇒ x.toFloat
-      case _ ⇒ throw PushkaException(value, Float.getClass)
+      case Ast.Num(x) => x.toFloat
+      case _ => throw PushkaException(value, Float.getClass)
     }
 
     def write(value: Float): Ast = {
@@ -93,8 +93,8 @@ class DefaultRWs extends Generated {
 
   implicit val long = new RW[Long] {
     def read(value: Ast): Long = value match {
-      case Ast.Num(x) ⇒ x.toLong
-      case _ ⇒ throw PushkaException(value, Long.getClass)
+      case Ast.Num(x) => x.toLong
+      case _ => throw PushkaException(value, Long.getClass)
     }
 
     def write(value: Long): Ast = {
@@ -104,8 +104,8 @@ class DefaultRWs extends Generated {
 
   implicit val string = new RW[String] {
     def read(value: Ast): String = value match {
-      case Ast.Str(x) ⇒ x
-      case _ ⇒ throw PushkaException(value, "String")
+      case Ast.Str(x) => x
+      case _ => throw PushkaException(value, "String")
     }
 
     def write(value: String): Ast = {
@@ -117,8 +117,8 @@ class DefaultRWs extends Generated {
     def write(value: UUID): Ast = Ast.Str(value.toString)
 
     def read(value: Ast): UUID = value match {
-      case Ast.Str(s) ⇒ UUID.fromString(s)
-      case _ ⇒ throw PushkaException(value, "UUID")
+      case Ast.Str(s) => UUID.fromString(s)
+      case _ => throw PushkaException(value, "UUID")
     }
   }
 
@@ -161,7 +161,7 @@ class DefaultRWs extends Generated {
     new Writer[Map[K, V]] {
       def write(value: Map[K, V]): Ast = {
         Ast.Obj(value map {
-          case (k, v) ⇒ (ev.stringify(k), w.write(v))
+          case (k, v) => (ev.stringify(k), w.write(v))
         })
       }
     }
@@ -169,44 +169,44 @@ class DefaultRWs extends Generated {
 
   implicit def seqR[T](implicit r: Reader[T]): Reader[Seq[T]] = new Reader[Seq[T]] {
     def read(value: Ast): Seq[T] = value match {
-      case Ast.Arr(xs) ⇒ xs.map(r.read).toSeq
-      case _ ⇒ throw PushkaException(value, Seq.getClass)
+      case Ast.Arr(xs) => xs.map(r.read).toSeq
+      case _ => throw PushkaException(value, Seq.getClass)
     }
   }
 
   implicit def vectorR[T](implicit r: Reader[T]): Reader[Vector[T]] = new Reader[Vector[T]] {
     def read(value: Ast): Vector[T] = value match {
-      case Ast.Arr(xs) ⇒ xs.map(r.read).toVector
-      case _ ⇒ throw PushkaException(value, Vector.getClass)
+      case Ast.Arr(xs) => xs.map(r.read).toVector
+      case _ => throw PushkaException(value, Vector.getClass)
     }
   }
 
   implicit def setR[T](implicit r: Reader[T]): Reader[Set[T]] = new Reader[Set[T]] {
     def read(value: Ast): Set[T] = value match {
-      case Ast.Arr(xs) ⇒ xs.map(r.read).toSet
-      case _ ⇒ throw PushkaException(value, Set.getClass)
+      case Ast.Arr(xs) => xs.map(r.read).toSet
+      case _ => throw PushkaException(value, Set.getClass)
     }
   }
 
   implicit def listR[T](implicit r: Reader[T]): Reader[List[T]] = new Reader[List[T]] {
     def read(value: Ast): List[T] = value match {
-      case Ast.Arr(xs) ⇒ xs.map(r.read).toList
-      case _ ⇒ throw PushkaException(value, List.getClass)
+      case Ast.Arr(xs) => xs.map(r.read).toList
+      case _ => throw PushkaException(value, List.getClass)
     }
   }
 
   implicit def arrayR[T](implicit r: Reader[T], classTag: ClassTag[T]): Reader[Array[T]] = new Reader[Array[T]] {
     def read(value: Ast): Array[T] = value match {
-      case Ast.Arr(xs) ⇒ xs.map(r.read).toArray
-      case _ ⇒ throw PushkaException(value, Array.getClass)
+      case Ast.Arr(xs) => xs.map(r.read).toArray
+      case _ => throw PushkaException(value, Array.getClass)
     }
   }
 
   implicit def mapR[K, V](implicit r: Reader[(K, V)], ev: Not[ObjectKey[K]]): Reader[Map[K, V]] = {
     new Reader[Map[K, V]] {
       def read(value: Ast): Map[K, V] = value match {
-        case Ast.Arr(xs) ⇒ (for (x ← xs) yield r.read(x)).toMap
-        case _ ⇒ throw PushkaException(value, Map.getClass)
+        case Ast.Arr(xs) => (for (x <- xs) yield r.read(x)).toMap
+        case _ => throw PushkaException(value, Map.getClass)
       }
     }
   }
@@ -214,10 +214,10 @@ class DefaultRWs extends Generated {
   implicit def mapAsObjectR[K, V](implicit rv: Reader[V], ev: ObjectKey[K]): Reader[Map[K, V]] = {
     new Reader[Map[K, V]] {
       def read(value: Ast): Map[K, V] = value match {
-        case Ast.Obj(m) ⇒ m map {
-          case (k, v) ⇒ (ev.parse(k), rv.read(v))
+        case Ast.Obj(m) => m map {
+          case (k, v) => (ev.parse(k), rv.read(v))
         }
-        case _ ⇒ throw PushkaException(value, Map.getClass)
+        case _ => throw PushkaException(value, Map.getClass)
       }
     }
   }

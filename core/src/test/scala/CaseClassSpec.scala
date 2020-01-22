@@ -20,9 +20,9 @@ class CaseClassSpec extends FlatSpec with Matchers {
   "Case classes" should "writes correctly" in {
     val instance = MyCaseClass(10, 10, "vodka")
     val m = Map(
-      "x" → pushka.Ast.Num(10),
-      "y" → pushka.Ast.Num(10),
-      "z" → pushka.Ast.Str("vodka")
+      "x" -> pushka.Ast.Num(10),
+      "y" -> pushka.Ast.Num(10),
+      "z" -> pushka.Ast.Str("vodka")
     )
     write(instance) should be(pushka.Ast.Obj(m))
   }
@@ -30,9 +30,9 @@ class CaseClassSpec extends FlatSpec with Matchers {
   it should "reads correctly" in {
     val instance = MyCaseClass(10, 10, "vodka")
     val m = Map(
-      "x" → pushka.Ast.Num(10),
-      "y" → pushka.Ast.Num(10),
-      "z" → pushka.Ast.Str("vodka")
+      "x" -> pushka.Ast.Num(10),
+      "y" -> pushka.Ast.Num(10),
+      "z" -> pushka.Ast.Str("vodka")
     )
     read[MyCaseClass](pushka.Ast.Obj(m)) should be(instance)
   }
@@ -47,8 +47,8 @@ class CaseClassSpec extends FlatSpec with Matchers {
 
   it should "throw exception with correct message if some fields are not defined" in {
     val invalidAst = Ast(
-      "x" → pushka.Ast.Num(10),
-      "z" → pushka.Ast.Str("vodka")
+      "x" -> pushka.Ast.Num(10),
+      "z" -> pushka.Ast.Str("vodka")
     )
     val exception = intercept[PushkaException] {
       read[MyCaseClass](invalidAst)
@@ -77,12 +77,12 @@ class CaseClassSpec extends FlatSpec with Matchers {
 
   "Generic case class" should "be written" in {
     val source = Point[Float](10, 10)
-    val pattern = Ast("x" → 10.0, "y" → 10.0)
+    val pattern = Ast("x" -> 10.0, "y" -> 10.0)
     write(source) shouldEqual pattern
   }
 
   it should "be read" in {
-    val source = Ast("x" → 10.0, "y" → 10.0)
+    val source = Ast("x" -> 10.0, "y" -> 10.0)
     val pattern = Point[Float](10, 10)
     read[Point[Float]](source) shouldEqual pattern
   }
@@ -96,18 +96,18 @@ class CaseClassSpec extends FlatSpec with Matchers {
   }
 
   "Option fields" should "be written without overhead" in {
-    val pattern = Ast.Obj(Map("y" → Ast.Str("vodka")))
+    val pattern = Ast.Obj(Map("y" -> Ast.Str("vodka")))
     write[MyCaseClass2](MyCaseClass2(None, "vodka")) should be(pattern)
   }
 
   it should "be read as None when field is not defined" in {
-    val source = Ast.Obj(Map("y" → Ast.Str("vodka")))
+    val source = Ast.Obj(Map("y" -> Ast.Str("vodka")))
     val pattern = MyCaseClass2(None, "vodka")
     read[MyCaseClass2](source) should be(pattern)
   }
 
   it should "be read as None when field is null" in {
-    val source = Ast.Obj(Map("x" → Ast.Null, "y" → Ast.Str("vodka")))
+    val source = Ast.Obj(Map("x" -> Ast.Null, "y" -> Ast.Str("vodka")))
     val pattern = MyCaseClass2(None, "vodka")
     read[MyCaseClass2](source) should be(pattern)
   }
@@ -122,29 +122,29 @@ class CaseClassSpec extends FlatSpec with Matchers {
 
   "Tuple fields" should "be written correctly" in {
     val pattern = Ast.Obj(Map(
-      "x" → Ast.Arr(Seq(
+      "x" -> Ast.Arr(Seq(
         Ast.Str("bear"),
         Ast.Num(9d)
       )),
-      "y" → Ast.Str("vodka"))
+      "y" -> Ast.Str("vodka"))
     )
     write(MyCaseClass3(("bear", 9d), "vodka")) should be(pattern)
   }
 
   it should "be read" in {
     val source = Ast.Obj(Map(
-      "x" → Ast.Arr(Seq(
+      "x" -> Ast.Arr(Seq(
         Ast.Str("bear"),
         Ast.Num("9.0")
       )),
-      "y" → Ast.Str("vodka"))
+      "y" -> Ast.Str("vodka"))
     )
     val pattern = MyCaseClass3(("bear", 9d), "vodka")
     read[MyCaseClass3](source) should be(pattern)
   }
 
   "Case class with default params" should "be read with default parameter if it was not defined in AST" in {
-    val source = Ast.Obj(Map("x" → Ast.Num(1)))
+    val source = Ast.Obj(Map("x" -> Ast.Num(1)))
     val pattern = WithDefaultParams(1, 100, Some(Point(1, 1)))
     read[WithDefaultParams](source) shouldEqual pattern
   }
@@ -158,12 +158,12 @@ class CaseClassSpec extends FlatSpec with Matchers {
   }
 
   "Case class with @key" should "be written" in {
-    val pattern = Ast.Obj(Map("@theX" → Ast.Num(1), "y" → Ast.Num(2)))
+    val pattern = Ast.Obj(Map("@theX" -> Ast.Num(1), "y" -> Ast.Num(2)))
     write(WithKeyAnnotation(1, 2)) should be(pattern)
   }
 
   it should "be read" in {
-    val source = Ast.Obj(Map("@theX" → Ast.Num(1), "y" → Ast.Num(2)))
+    val source = Ast.Obj(Map("@theX" -> Ast.Num(1), "y" -> Ast.Num(2)))
     val pattern = WithKeyAnnotation(1, 2)
     read[WithKeyAnnotation](source) should be(pattern)
   }

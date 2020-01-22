@@ -6,7 +6,6 @@ import scala.language.postfixOps
 import scala.annotation.{StaticAnnotation, tailrec}
 import scala.reflect.macros.blackbox
 
-import macrocompat.bundle
 
 class pushka extends StaticAnnotation {
   def macroTransform(annottees: Any*): Any =
@@ -16,7 +15,7 @@ class pushka extends StaticAnnotation {
 /**
  * @author Aleksey Fomkin <aleksey.fomkin@gmail.com>
  */
-@bundle class PushkaAnnotatioMacro(val c: blackbox.Context) {
+class PushkaAnnotatioMacro(val c: blackbox.Context) {
 
   import c.universe._
 
@@ -24,13 +23,13 @@ class pushka extends StaticAnnotation {
 
     def findAnnotationFlag(name: String, annotations: List[c.Tree]): Boolean = {
       annotations exists {
-        case q"new $name()" ⇒ true
+        case q"new $name()" => true
         case _ => false
       }
     }
     def customKeyForFiled(field: ValDef): Option[String] = {
       field.mods.annotations collectFirst {
-        case q"new key(${s: String})" ⇒ s
+        case q"new key(${s: String})" => s
       }
     }
 
@@ -39,7 +38,7 @@ class pushka extends StaticAnnotation {
     }
 
     def caseClassReader(className: TypeName, fields: List[ValDef], annotations: List[c.Tree]) = fields match {
-      case field :: Nil if !findAnnotationFlag("forceObject", annotations) ⇒
+      case field :: Nil if !findAnnotationFlag("forceObject", annotations) =>
         if (customKeyForFiled(field).nonEmpty) {
           c.warning(field.pos,
             "@key annotation will ignored cause classes with one filed writes without object " +
@@ -47,8 +46,8 @@ class pushka extends StaticAnnotation {
           )
         }
         q"${className.toTermName}(pushka.read[${field.tpt}](value))"
-      case _ ⇒
-        val fReaders = fields map { x ⇒
+      case _ =>
+        val fReaders = fields map { x =>
           if (x.rhs.nonEmpty) {
             q"""
               ${x.name} = m.get(${keyFromField(x)}).
@@ -73,20 +72,20 @@ class pushka extends StaticAnnotation {
         q"""
           value match {
             case pushka.Ast.Obj(m) => ${className.toTermName}(..$fReaders)
-            case _ ⇒ throw pushka.PushkaException(value, ${className.toTermName.toString})
+            case _ => throw pushka.PushkaException(value, ${className.toTermName.toString})
           }
         """
     }
 
     def caseClassWriter(className: TypeName, fields: List[ValDef], annotations: List[c.Tree]) = fields match {
-      case field :: Nil if !findAnnotationFlag("forceObject", annotations) ⇒
+      case field :: Nil if !findAnnotationFlag("forceObject", annotations) =>
         q"pushka.write(value.${field.name})"
-      case _ ⇒
+      case _ =>
         def basicW(field: ValDef) = {
           val key = keyFromField(field)
           q"$key -> pushka.write(value.${field.name})"
         }
-        val writers = fields map { field ⇒
+        val writers = fields map { field =>
           val t = field.tpt
           val n = field.name
           val w = basicW(field)
@@ -110,25 +109,25 @@ class pushka extends StaticAnnotation {
       val writer = caseClassWriter(className, fields, annotations)
 
       typeParams match {
-        case Nil ⇒
+        case Nil =>
           q"""
             implicit val _rw: pushka.RW[$className] = new pushka.RW[$className] {
               def read(value: pushka.Ast) = $reader
               def write(value: $className): pushka.Ast = $writer
             }
           """
-        case _ ⇒
+        case _ =>
           @tailrec
           def makeRWsRec(i: Int, acc: List[Tree], tl: List[TypeName]): List[Tree] = tl match {
-            case x :: xs ⇒
+            case x :: xs =>
               val (ri, wi, di) = (TermName("r" + i), TermName("w" + i), TermName("d" + i))
               val r = q"$ri : pushka.Reader[$x]"
               val w = q"$wi : pushka.Writer[$x]"
               val d = q"$di : pushka.HasDefault[$x]"
               makeRWsRec(i + 1, d :: r :: w :: acc, xs)
-            case Nil ⇒ acc
+            case Nil => acc
           }
-          val defs = typeParams.map(x ⇒ TypeDef(Modifiers(), TypeName(x.name.toString), Nil, x.rhs))
+          val defs = typeParams.map(x => TypeDef(Modifiers(), TypeName(x.name.toString), Nil, x.rhs))
           val params = defs.map(_.name)
           val rwds = makeRWsRec(0, Nil, params)
           q"""
@@ -151,39 +150,39 @@ class pushka extends StaticAnnotation {
       // of a sealed trait will processed by Pushka (i.e. generate RWs for them).
       @tailrec def genUpdatedBody(acc: List[Tree], tail: List[Tree]): List[Tree] = {
         def checkCaseClass(classDecl: ClassDef, compDecl: Option[ModuleDef]) = classDecl match {
-          case q"$mods class $n(..$fields) extends ..$p { ..$body }" if mods.hasFlag(Flag.CASE) && checkSuperClass(p) ⇒
+          case q"$mods class $n(..$fields) extends ..$p { ..$body }" if mods.hasFlag(Flag.CASE) && checkSuperClass(p) =>
             classDecl :: modifiedCompanion(compDecl, caseClassRW(n, Nil, fields, mods.annotations), n) :: acc
-          case _ ⇒ classDecl :: acc
+          case _ => classDecl :: acc
         }
         def compareNames(classDecl: ClassDef, compDecl: ModuleDef): Boolean = {
           classDecl.name.toString == compDecl.name.toString
         }
         tail match {
-          case Nil ⇒ acc
-          case (classDecl: ClassDef) :: (compDecl: ModuleDef) :: xs if compareNames(classDecl, compDecl) ⇒
+          case Nil => acc
+          case (classDecl: ClassDef) :: (compDecl: ModuleDef) :: xs if compareNames(classDecl, compDecl) =>
             val newAcc = checkCaseClass(classDecl, Some(compDecl))
             genUpdatedBody(newAcc, xs)
-          case (classDecl: ClassDef) :: xs ⇒
+          case (classDecl: ClassDef) :: xs =>
             val newAcc = checkCaseClass(classDecl, None)
             genUpdatedBody(newAcc, xs)
-          case ignore :: xs ⇒ genUpdatedBody(ignore :: acc, xs)
+          case ignore :: xs => genUpdatedBody(ignore :: acc, xs)
         }
       }
 
       // Check base classes contains this sealed trait.
       def checkSuperClass(xs: List[Tree]) = xs exists {
-        case x: Ident ⇒ x.name == traitName
-        case _ ⇒ false
+        case x: Ident => x.name == traitName
+        case _ => false
       }
 
       // Convert scala names to JSON object key names
       // MyCaseObject -> myCaseObject
       def variantName(n: Name) = {
         val s = n.toString
-        s.charAt(0).toLower + s.substring(1)
+        s.charAt(0).toLower.toString + s.substring(1)
       }
 
-      def genValueMatching(names: Seq[VariantName], read: Boolean)(genCase: VariantName ⇒ Tree): Tree = {
+      def genValueMatching(names: Seq[VariantName], read: Boolean)(genCase: VariantName => Tree): Tree = {
         val elseThrowPushkaException = if (read) {
           cq"_ => throw pushka.PushkaException(value, ${traitName.toTermName.toString})"
         } else {
@@ -203,9 +202,9 @@ class pushka extends StaticAnnotation {
       val names: Seq[VariantName] = {
         val list = (body: List[Tree]) collect {
           case q"$mods object $n extends ..$p { ..$body }"
-            if checkSuperClass(p) && mods.hasFlag(Flag.CASE) ⇒ Left(n)
+            if checkSuperClass(p) && mods.hasFlag(Flag.CASE) => Left(n)
           case q"$mods class $n(..$fields) extends ..$p  { ..$body }"
-            if checkSuperClass(p) && mods.hasFlag(Flag.CASE) ⇒ Right(n)
+            if checkSuperClass(p) && mods.hasFlag(Flag.CASE) => Right(n)
         }
         // Case classes are matched by variable pattern (see bellow)
         // it disallow to match anything elese (SLS 8.1.1).
@@ -215,18 +214,18 @@ class pushka extends StaticAnnotation {
 
       // Matching on pushka.Ast to find right reader
       val readMatcher = genValueMatching(names, read = true) {
-        case Right(n) ⇒
+        case Right(n) =>
           val lower = variantName(n)
           cq"pushka.Ast.Obj(m) if m.contains($lower) => ${n.toTermName}._rw.read(m($lower))"
-        case Left(n) ⇒ cq"pushka.Ast.Str(${variantName(n)}) => $n"
+        case Left(n) => cq"pushka.Ast.Str(${variantName(n)}) => $n"
       }
 
       // Matching on pushka.Ast to find right writer
       val writeMatcher = genValueMatching(names, read = false) {
-        case Right(n) ⇒
+        case Right(n) =>
           val lower = variantName(n)
           cq"o: $n => pushka.Ast.Obj(Map($lower -> ${n.toTermName}._rw.write(o)))"
-        case Left(n) ⇒ cq"`$n` => pushka.Ast.Str(${variantName(n)})"
+        case Left(n) => cq"`$n` => pushka.Ast.Str(${variantName(n)})"
       }
 
       q"""
@@ -257,16 +256,16 @@ class pushka extends StaticAnnotation {
 
     def modifiedDeclaration(classDecl: ClassDef, compDeclOpt: Option[ModuleDef] = None) = {
       val compDecl = classDecl match {
-        case q"$mods class $className[..$typeParams](..$fields) extends ..$bases { ..$body }" if mods.hasFlag(Flag.CASE) ⇒
+        case q"$mods class $className[..$typeParams](..$fields) extends ..$bases { ..$body }" if mods.hasFlag(Flag.CASE) =>
           val rw = caseClassRW(className, typeParams, fields, mods.annotations)
           modifiedCompanion(compDeclOpt, rw, className)
-        case q"$mods class $className(..$fields) extends ..$bases { ..$body }" if mods.hasFlag(Flag.CASE) ⇒
+        case q"$mods class $className(..$fields) extends ..$bases { ..$body }" if mods.hasFlag(Flag.CASE) =>
           val rw = caseClassRW(className, Nil, fields, mods.annotations)
           modifiedCompanion(compDeclOpt, rw, className)
-        case ClassDef(mods, traitName, _, _) if mods.hasFlag(Flag.SEALED) && mods.hasFlag(Flag.TRAIT) ⇒
+        case ClassDef(mods, traitName, _, _) if mods.hasFlag(Flag.SEALED) && mods.hasFlag(Flag.TRAIT) =>
           compDeclOpt match {
-            case Some(x) ⇒ sealedTraitRW(traitName, x)
-            case None ⇒ c.abort(c.enclosingPosition, "Companion object declaration expected")
+            case Some(x) => sealedTraitRW(traitName, x)
+            case None => c.abort(c.enclosingPosition, "Companion object declaration expected")
           }
         case _ =>
           println("Error: "+showRaw(classDecl))

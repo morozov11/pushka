@@ -22,21 +22,21 @@ object Ast {
   case class Obj(value: Map[String, Ast]) extends Ast
 
   private[this] def convert(value: Any): Ast = value match {
-    case x: Ast ⇒ x
-    case x: Byte ⇒ Num(x.toString)
-    case x: Short ⇒ Num(x.toString)
-    case x: Int ⇒ Num(x.toString)
-    case x: Float ⇒ Num(x.toString)
-    case x: Double ⇒ Num(x.toString)
-    case x: Long ⇒ Num(x.toString)
-    case x: Boolean if x ⇒ True
-    case x: Boolean if !x ⇒ False
-    case x: String ⇒ Str(x)
-    case x: Seq[_] ⇒ Arr(x.map(convert).toList)
+    case x: Ast => x
+    case x: Byte => Num(x.toString)
+    case x: Short => Num(x.toString)
+    case x: Int => Num(x.toString)
+    case x: Float => Num(x.toString)
+    case x: Double => Num(x.toString)
+    case x: Long => Num(x.toString)
+    case x: Boolean if x => True
+    case x: Boolean if !x => False
+    case x: String => Str(x)
+    case x: Seq[_] => Arr(x.map(convert).toList)
   }
 
   def apply(pairs: (String, Any)*): Obj = {
-    val astPairs = pairs map { case (key, value) ⇒ (key, convert(value)) }
+    val astPairs = pairs map { case (key, value) => (key, convert(value)) }
     Obj(astPairs.toMap)
   }
 } 

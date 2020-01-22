@@ -72,7 +72,7 @@ class DefaultRWSpec extends FlatSpec with Matchers {
     write[Double](32.0d) should be(Ast.Num(32.0d))
   }
   it should "throw exception with correct message if Ast is invalid" in {
-    val invalidAst = Ast("foo" → "bar")
+    val invalidAst = Ast("foo" -> "bar")
     val exception = intercept[PushkaException] {
       read[Double](invalidAst)
     }
@@ -148,7 +148,7 @@ class DefaultRWSpec extends FlatSpec with Matchers {
   }
 
   "Map with arbitrary key" should "be written to array of kv pairs" in {
-    val source = Map(ArbitaryKey(0) → "a", ArbitaryKey(1) → "b")
+    val source = Map(ArbitaryKey(0) -> "a", ArbitaryKey(1) -> "b")
     val pattern = Ast.Arr(List(
       Ast.Arr(List(Ast.Num(0), Ast.Str("a"))),
       Ast.Arr(List(Ast.Num(1), Ast.Str("b")))
@@ -156,7 +156,7 @@ class DefaultRWSpec extends FlatSpec with Matchers {
     write(source) shouldEqual pattern
   }
   it should "be read from array of pairs" in {
-    val pattern = Map(ArbitaryKey(0) → "a", ArbitaryKey(1) → "b")
+    val pattern = Map(ArbitaryKey(0) -> "a", ArbitaryKey(1) -> "b")
     val source = Ast.Arr(List(
       Ast.Arr(List(Ast.Num(0), Ast.Str("a"))),
       Ast.Arr(List(Ast.Num(1), Ast.Str("b")))
@@ -172,29 +172,29 @@ class DefaultRWSpec extends FlatSpec with Matchers {
   }
 
   "Map which key could be converted to string by default" should "be written to JSON object" in {
-    val source = Map("0" → "a", "1" → "b")
-    val pattern = Ast.Obj(Map("0" → Ast.Str("a"), "1" → Ast.Str("b")))
+    val source = Map("0" -> "a", "1" -> "b")
+    val pattern = Ast.Obj(Map("0" -> Ast.Str("a"), "1" -> Ast.Str("b")))
     write(source) shouldEqual pattern
   }
   it should "be read from JSON object" in {
     val pattern = Map(
-      UUID.fromString("102b392e-862d-45e4-8140-35493598dff7") → "a",
-      UUID.fromString("2c2fe2ce-1f6d-4cca-8ade-68a7bedc226f") → "b")
+      UUID.fromString("102b392e-862d-45e4-8140-35493598dff7") -> "a",
+      UUID.fromString("2c2fe2ce-1f6d-4cca-8ade-68a7bedc226f") -> "b")
     val source = Ast.Obj(Map(
-      "102b392e-862d-45e4-8140-35493598dff7" → Ast.Str("a"),
-      "2c2fe2ce-1f6d-4cca-8ade-68a7bedc226f" → Ast.Str("b"))
+      "102b392e-862d-45e4-8140-35493598dff7" -> Ast.Str("a"),
+      "2c2fe2ce-1f6d-4cca-8ade-68a7bedc226f" -> Ast.Str("b"))
     )
     read[Map[UUID, String]](source) shouldEqual pattern
   }
 
   "Map which custom key could be converted to string" should "be written to JSON object" in {
-    val source = Map(Id[ArbitaryKey](0) → "a", Id[ArbitaryKey](1) → "b")
-    val pattern = Ast.Obj(Map("0" → Ast.Str("a"), "1" → Ast.Str("b")))
+    val source = Map(Id[ArbitaryKey](0) -> "a", Id[ArbitaryKey](1) -> "b")
+    val pattern = Ast.Obj(Map("0" -> Ast.Str("a"), "1" -> Ast.Str("b")))
     write(source) shouldEqual pattern
   }
   it should "be read from JSON object" in {
-    val pattern = Map(Id[ArbitaryKey](0) → "a", Id[ArbitaryKey](1) → "b")
-    val source = Ast.Obj(Map("0" → Ast.Str("a"), "1" → Ast.Str("b")))
+    val pattern = Map(Id[ArbitaryKey](0) -> "a", Id[ArbitaryKey](1) -> "b")
+    val source = Ast.Obj(Map("0" -> Ast.Str("a"), "1" -> Ast.Str("b")))
     read[Map[Id[ArbitaryKey], String]](source) shouldEqual pattern
   }
 
@@ -209,7 +209,7 @@ class DefaultRWSpec extends FlatSpec with Matchers {
     write(source) should be(pattern)
   }
   it should "throw exception with correct message if Ast is invalid" in {
-    val invalidAst = Ast("bar" → "foo")
+    val invalidAst = Ast("bar" -> "foo")
     val exception = intercept[PushkaException] {
       read[Set[Int]](invalidAst)
     }
@@ -217,13 +217,13 @@ class DefaultRWSpec extends FlatSpec with Matchers {
   }
 
   "Either left" should "be read from object" in {
-    val source = Ast.Obj(Map("left" → Ast.Str("hello")))
+    val source = Ast.Obj(Map("left" -> Ast.Str("hello")))
     val pattern = Left("hello")
     read[Either[String, Int]](source) should be(pattern)
   }
   it should "be written into object" in {
     val source = Left("hello")
-    val pattern = Ast.Obj(Map("left" → Ast.Str("hello")))
+    val pattern = Ast.Obj(Map("left" -> Ast.Str("hello")))
     write[Either[String, Int]](source) should be(pattern)
   }
   it should "throw exception with correct message if Ast is invalid" in {
@@ -235,13 +235,13 @@ class DefaultRWSpec extends FlatSpec with Matchers {
   }
 
   "Either right" should "be read from object" in {
-    val source = Ast.Obj(Map("right" → Ast.Num(20)))
+    val source = Ast.Obj(Map("right" -> Ast.Num(20)))
     val pattern = Right(20)
     read[Either[String, Int]](source) should be(pattern)
   }
   it should "be written into object" in {
     val source = Right(20)
-    val pattern = Ast.Obj(Map("right" → Ast.Num(20)))
+    val pattern = Ast.Obj(Map("right" -> Ast.Num(20)))
     write[Either[String, Int]](source) should be(pattern)
   }
   it should "throw exception with correct message if Ast is invalid" in {
