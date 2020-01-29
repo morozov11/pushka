@@ -80,10 +80,10 @@ class DefaultRWSpec extends FlatSpec with Matchers {
   }
 
   "Long" should "be read from string" in {
-    read[Long](Ast.Num("609300804742756865")) should be(609300804742756865l)
+    read[Long](Ast.Num("609300804742756865")) should be(609300804742756865L)
   }
   it should "be written to string" in {
-    write(609300804742756865l) should be(Ast.Num("609300804742756865"))
+    write(609300804742756865L) should be(Ast.Num("609300804742756865"))
   }
   it should "throw exception with correct message if Ast is invalid" in {
     val invalidAst = Ast.Arr(Seq())

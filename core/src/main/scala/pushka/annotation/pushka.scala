@@ -2,9 +2,9 @@ package pushka.annotation
 
 import scala.language.experimental.macros
 import scala.language.postfixOps
-
-import scala.annotation.{StaticAnnotation, tailrec}
-import scala.reflect.macros.blackbox
+import scala.annotation.{StaticAnnotation, compileTimeOnly, tailrec}
+import scala.reflect.macros.{blackbox, whitebox}
+import scala.collection.immutable.List
 
 
 class pushka extends StaticAnnotation {
@@ -15,7 +15,8 @@ class pushka extends StaticAnnotation {
 /**
  * @author Aleksey Fomkin <aleksey.fomkin@gmail.com>
  */
-class PushkaAnnotatioMacro(val c: blackbox.Context) {
+@compileTimeOnly("enable macro paradise to expand macro annotations")
+class PushkaAnnotatioMacro(val c: whitebox.Context) {
 
   import c.universe._
 

@@ -15,9 +15,9 @@ val commonSettings = Seq(
   scalacOptions ++= Seq(
     "-deprecation",
     "-feature",
-    "-Xfatal-warnings",
     "-language:postfixOps",
-    "-language:implicitConversions"
+    "-language:implicitConversions",
+    "-Ymacro-annotations"
   )
 )
 
@@ -30,6 +30,7 @@ lazy val core = crossProject.crossType(CrossType.Pure).
       "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
       "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided"
     ),
+    //addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full),
     sourceGenerators in Compile += sourceManaged in Compile map GenTuples,
     licenses      += ("Apache-2.0", url("http://www.apache.org/licenses/")),
     version := "0.8.1-sevts",

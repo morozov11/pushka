@@ -14,7 +14,7 @@ final class JsonParser extends Parser[String] {
     case false => Ast.False
     case null => Ast.Null
     case s: js.Array[_] => Ast.Arr(s.map(readAst(_: Any)).toList)
-    case s: js.Object => Ast.Obj(s.asInstanceOf[js.Dictionary[_]].view.mapValues(readAst).toMap)
+    case s: js.Object => Ast.Obj(s.asInstanceOf[js.Dictionary[_]].mapValues(readAst).toMap)
   }
 
   def parse(data: String): Ast = {
